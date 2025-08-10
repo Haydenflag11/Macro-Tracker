@@ -1,0 +1,84 @@
+<!-- Macro Tracker with Daily Goals -->
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Macro Tracker with Goals</title>
+<style>
+/* Styles same as before with added goal bar */
+</style>
+</head>
+<body>
+<div class="app">
+<header>
+  <h1>Macro Tracker</h1>
+  <div class="settings small">
+    <label for="apiKey">API Key</label>
+    <input id="apiKey" type="text" placeholder="Paste USDA API key">
+    <button id="saveKey">Save</button>
+    <button id="clearStorage" style="background:#ef4444">Clear</button>
+  </div>
+</header>
+
+<section class="card">
+  <h2>Set Daily Goals</h2>
+  <div>
+    Calories: <input id="goalCals" type="number" placeholder="kcal">
+    Protein: <input id="goalProtein" type="number" placeholder="g">
+    Carbs: <input id="goalCarbs" type="number" placeholder="g">
+    Fat: <input id="goalFat" type="number" placeholder="g">
+    <button id="saveGoals">Save Goals</button>
+  </div>
+</section>
+
+<section class="card">
+  <!-- Search and logging UI from previous version -->
+</section>
+
+<section class="card">
+  <h2>Daily Totals</h2>
+  <div id="totals"></div>
+  <div id="goalsProgress"></div>
+</section>
+</div>
+
+<script>
+const GOALS_KEY = 'macro-tracker-goals'
+
+function loadGoals(){
+  const g = JSON.parse(localStorage.getItem(GOALS_KEY) || '{}')
+  document.getElementById('goalCals').value = g.calories || ''
+  document.getElementById('goalProtein').value = g.protein || ''
+  document.getElementById('goalCarbs').value = g.carbs || ''
+  document.getElementById('goalFat').value = g.fat || ''
+  return g
+}
+function saveGoals(){
+  const g = {
+    calories: parseFloat(document.getElementById('goalCals').value)||0,
+    protein: parseFloat(document.getElementById('goalProtein').value)||0,
+    carbs: parseFloat(document.getElementById('goalCarbs').value)||0,
+    fat: parseFloat(document.getElementById('goalFat').value)||0
+  }
+  localStorage.setItem(GOALS_KEY, JSON.stringify(g))
+  renderGoals()
+}
+function renderGoals(){
+  const g = loadGoals()
+  const totals = computeTotals()
+  const progress = id => g[id]?`(${Math.round(totals[id]/g[id]*100)}%)`:'(no goal)'
+  document.getElementById('goalsProgress').innerHTML = `
+    Calories: ${totals.calories} / ${g.calories} ${progress('calories')}<br>
+    Protein: ${totals.protein} / ${g.protein}g ${progress('protein')}<br>
+    Carbs: ${totals.carbs} / ${g.carbs}g ${progress('carbs')}<br>
+    Fat: ${totals.fat} / ${g.fat}g ${progress('fat')}
+  `
+}
+
+document.getElementById('saveGoals').addEventListener('click', saveGoals)
+loadGoals()
+renderGoals()
+</script>
+</body>
+</html>
